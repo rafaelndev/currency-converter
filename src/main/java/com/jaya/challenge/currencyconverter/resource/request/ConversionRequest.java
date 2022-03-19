@@ -12,9 +12,6 @@ import java.math.BigDecimal;
 @Setter
 @NoArgsConstructor
 public class ConversionRequest {
-	@NotNull
-	private Integer userId;
-
 	@NotEmpty
 	private String targetCurrency;
 

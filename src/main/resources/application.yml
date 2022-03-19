@@ -7,3 +7,14 @@ spring:
     url: r2dbc:h2:mem:///db
     username: sa
     password:
+
+springdoc:
+  swagger-ui:
+    path: /docs
+
+app:
+  config:
+    exchange-rates-api:
+      url: "http://api.exchangeratesapi.io/v1/latest"
+      accessKey:
+
