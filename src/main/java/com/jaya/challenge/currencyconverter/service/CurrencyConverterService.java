@@ -4,7 +4,8 @@ import com.jaya.challenge.currencyconverter.data.domain.ConversionTransaction;
 import com.jaya.challenge.currencyconverter.data.domain.User;
 import com.jaya.challenge.currencyconverter.data.repository.ConversionTransactionRepository;
 import com.jaya.challenge.currencyconverter.data.repository.UserRepository;
-import com.jaya.challenge.currencyconverter.exception.DataNotFoundException;
+import com.jaya.challenge.currencyconverter.exception.EntityNotFoundException;
+import com.jaya.challenge.currencyconverter.service.response.ExchangeRateApiResponse;
 import com.jaya.challenge.currencyconverter.utils.DateUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,14 +29,7 @@ public class CurrencyConverterService {
 		return getUserById(userId)
 				.flatMap(user -> exchangeRatesApiService.getExchangeRate(targetCurrencyCode)
 						.flatMap(exchangeRateApiResponse -> {
-							ConversionTransaction transaction = new ConversionTransaction();
-							transaction.setTransactionId(UUID.randomUUID());
-							transaction.setOriginCurrency("EUR");
-							transaction.setExchangeRate(exchangeRateApiResponse.getRates().get(targetCurrencyCode));
-							transaction.setDestinationCurrency(targetCurrencyCode);
-							transaction.setOriginValue(value);
-							transaction.setCreatedDate(DateUtils.getCurrentDateUTC());
-							transaction.setUserId(user.getId());
+							ConversionTransaction transaction = mapConversionTransaction(value, targetCurrencyCode, user, exchangeRateApiResponse);
 							return repository.save(transaction);
 						}));
 
@@ -46,10 +40,22 @@ public class CurrencyConverterService {
 				.flatMapMany(user -> repository.findByUserId(user.getId()));
 	}
 
+	private ConversionTransaction mapConversionTransaction(BigDecimal value, String targetCurrencyCode, User user, ExchangeRateApiResponse exchangeRateApiResponse) {
+		ConversionTransaction transaction = new ConversionTransaction();
+		transaction.setTransactionId(UUID.randomUUID());
+		transaction.setOriginCurrency("EUR");
+		transaction.setExchangeRate(exchangeRateApiResponse.getRates().get(targetCurrencyCode));
+		transaction.setDestinationCurrency(targetCurrencyCode);
+		transaction.setOriginValue(value);
+		transaction.setCreatedDate(DateUtils.getCurrentDateUTC());
+		transaction.setUserId(user.getId());
+		return transaction;
+	}
+
 
 	private Mono<User> getUserById(Integer userId) {
 		return userRepository.findById(userId)
-				.switchIfEmpty(Mono.error(new DataNotFoundException(String.format("User %s not found", userId))));
+				.switchIfEmpty(Mono.error(new EntityNotFoundException(String.format("User %s not found", userId))));
 	}
 
 }

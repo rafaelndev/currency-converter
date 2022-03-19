@@ -36,8 +36,8 @@ public class RestExceptionHandler {
 		return new ResponseEntity<>(error, httpStatus);
 	}
 
-	@ExceptionHandler(DataNotFoundException.class)
-	public ResponseEntity<RestError> handleDateNotFoundException(DataNotFoundException ex, ServerHttpRequest request) {
+	@ExceptionHandler(EntityNotFoundException.class)
+	public ResponseEntity<RestError> handleEntityNotFound(EntityNotFoundException ex, ServerHttpRequest request) {
 		RestError error = RestError.builder()
 				.status(HttpStatus.NOT_FOUND.value())
 				.errorCode(HttpStatus.NOT_FOUND.getReasonPhrase())
