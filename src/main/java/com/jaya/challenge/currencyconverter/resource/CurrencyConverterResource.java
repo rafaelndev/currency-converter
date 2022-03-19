@@ -17,7 +17,7 @@ import reactor.core.publisher.Mono;
 import javax.validation.Valid;
 
 public interface CurrencyConverterResource {
-	@PostMapping("/convert/{userId}")
+	@PostMapping(value = "/convert/{userId}")
 	@Operation(
 			summary = "Convert a currency",
 			description = "Convert a currency value based on current exchange rates",

@@ -5,18 +5,21 @@ import com.jaya.challenge.currencyconverter.resource.request.ConversionRequest;
 import com.jaya.challenge.currencyconverter.resource.response.TransactionResponse;
 import com.jaya.challenge.currencyconverter.service.CurrencyConverterService;
 import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping(value = "/currency-converter")
+@RequestMapping(value = "/api/v1/currency-converter")
 @AllArgsConstructor
+@Log4j2
 public class CurrencyConverterController implements CurrencyConverterResource {
 	private final CurrencyConverterService service;
 
 	public Mono<TransactionResponse> convertCurrency(Integer userId, ConversionRequest request) {
+		log.info("Converting currency for user {}, with request: {}", userId, request);
 		return service.convertCurrency(userId, request.getValue(), request.getTargetCurrency())
 				.map(this::mapTransactionResponse);
 
@@ -24,6 +27,7 @@ public class CurrencyConverterController implements CurrencyConverterResource {
 
 	@Override
 	public Flux<TransactionResponse> getUserTransactions(Integer userId) {
+		log.info("Obtaining user {} transactions", userId);
 		return service.getTransactionsByUser(userId)
 				.map(this::mapTransactionResponse);
 	}
