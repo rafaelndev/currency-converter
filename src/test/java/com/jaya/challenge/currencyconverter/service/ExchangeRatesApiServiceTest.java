@@ -68,7 +68,7 @@ class ExchangeRatesApiServiceTest {
 
 	@Test
 	@DisplayName("should return a ExchangeRatesApiException when request to api fails with error 4xx")
-	void shouldReturnErrorWhenRequestFails() throws JsonProcessingException, InterruptedException {
+	void shouldReturnErrorWhenRequestFailsWithError400() throws JsonProcessingException, InterruptedException {
 		String targetCurrency = "BRL";
 		ExchangeRatesApiError apiError = new ExchangeRatesApiError();
 		apiError.setCode("test_error_code");
@@ -95,4 +95,28 @@ class ExchangeRatesApiServiceTest {
 				.verify();
 	}
 
+
+	@Test
+	@DisplayName("should return a ExchangeRatesApiException when request to api fails with error 5xx")
+	void shouldReturnErrorWhenRequestFailsWithError500() {
+		String targetCurrency = "BRL";
+
+		mockWebServer.enqueue(new MockResponse()
+				.setResponseCode(500)
+				.setBody("ERROR_BODY")
+				.addHeader("Content-Type", "application/json")
+		);
+
+		Mono<ExchangeRateApiResponse> exchangeRateResponse = apiService.getExchangeRate(targetCurrency);
+
+		StepVerifier.create(exchangeRateResponse)
+				.expectErrorSatisfies(throwable -> {
+					assertThat(throwable).isInstanceOf(ExchangeRatesApiException.class);
+					ExchangeRatesApiException exception = (ExchangeRatesApiException) throwable;
+					assertThat(exception.getMessage()).isEqualTo("Exchange Rates Api Internal Error");
+					assertThat(exception.getStatusCode()).isEqualTo(500);
+					assertThat(exception.getErrorCode()).isEqualTo("Internal Error");
+				})
+				.verify();
+	}
 }
