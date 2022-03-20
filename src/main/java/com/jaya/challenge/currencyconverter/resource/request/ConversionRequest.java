@@ -7,6 +7,7 @@ import lombok.ToString;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.math.BigDecimal;
 
 @Getter
@@ -18,5 +19,6 @@ public class ConversionRequest {
 	private String targetCurrency;
 
 	@NotNull
+	@Positive
 	private BigDecimal value;
 }

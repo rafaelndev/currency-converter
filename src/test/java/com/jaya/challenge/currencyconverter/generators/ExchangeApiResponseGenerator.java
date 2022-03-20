@@ -1,5 +1,7 @@
 package com.jaya.challenge.currencyconverter.generators;
 
+import com.jaya.challenge.currencyconverter.exception.error.ExchangeRateApiError;
+import com.jaya.challenge.currencyconverter.exception.error.ExchangeRateApiResponseError;
 import com.jaya.challenge.currencyconverter.service.response.ExchangeRateApiResponse;
 
 import java.math.BigDecimal;
@@ -21,5 +23,15 @@ public class ExchangeApiResponseGenerator {
 		));
 
 		return response;
+	}
+
+	public static ExchangeRateApiResponseError getError() {
+		ExchangeRateApiError apiError = new ExchangeRateApiError();
+		apiError.setCode("test_error_code");
+		apiError.setMessage("test_error_message");
+		ExchangeRateApiResponseError responseError = new ExchangeRateApiResponseError();
+		responseError.setError(apiError);
+
+		return responseError;
 	}
 }

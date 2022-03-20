@@ -2,9 +2,12 @@ package com.jaya.challenge.currencyconverter.generators;
 
 import com.jaya.challenge.currencyconverter.data.domain.ConversionTransaction;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class ConversionTransactionGenerator {
@@ -12,7 +15,12 @@ public class ConversionTransactionGenerator {
 	private ConversionTransactionGenerator() {
 	}
 
-	public static Flux<ConversionTransaction> getValidList() {
+	public static Flux<ConversionTransaction> getValidFlux() {
+		Mono<List<ConversionTransaction>> list = Mono.just(getValidList());
+		return list.flatMapMany(Flux::fromIterable);
+	}
+
+	public static List<ConversionTransaction> getValidList() {
 		ConversionTransaction transaction1 = new ConversionTransaction();
 		transaction1.setId(1);
 		transaction1.setTransactionId(UUID.fromString("efed3324-9278-41a2-be92-972884f94207"));
@@ -32,7 +40,7 @@ public class ConversionTransactionGenerator {
 		transaction2.setExchangeRate(BigDecimal.valueOf(4.99));
 		transaction2.setCreatedDate(ZonedDateTime.parse("2022-03-18T13:12:01.2336025Z"));
 		transaction2.setUserId(10);
-		return Flux.just(transaction1, transaction2);
+		return new ArrayList<>(List.of(transaction1, transaction2));
 	}
 
 	public static ConversionTransaction getValid() {
@@ -44,6 +52,7 @@ public class ConversionTransactionGenerator {
 		transaction1.setOriginValue(BigDecimal.valueOf(5000));
 		transaction1.setExchangeRate(BigDecimal.valueOf(3.77));
 		transaction1.setCreatedDate(ZonedDateTime.parse("2022-03-19T15:19:07.7138024Z"));
+		transaction1.setUserId(1);
 		return transaction1;
 	}
 

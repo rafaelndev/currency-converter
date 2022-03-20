@@ -4,8 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jaya.challenge.currencyconverter.configuration.ExchangeRatesApiConfig;
 import com.jaya.challenge.currencyconverter.exception.ExchangeRatesApiException;
-import com.jaya.challenge.currencyconverter.exception.error.ExchangeRatesApiError;
-import com.jaya.challenge.currencyconverter.exception.error.ExchangeRatesApiResponseError;
+import com.jaya.challenge.currencyconverter.exception.error.ExchangeRateApiResponseError;
 import com.jaya.challenge.currencyconverter.generators.ExchangeApiResponseGenerator;
 import com.jaya.challenge.currencyconverter.service.response.ExchangeRateApiResponse;
 import okhttp3.mockwebserver.MockResponse;
@@ -68,13 +67,9 @@ class ExchangeRatesApiServiceTest {
 
 	@Test
 	@DisplayName("should return a ExchangeRatesApiException when request to api fails with error 4xx")
-	void shouldReturnErrorWhenRequestFailsWithError400() throws JsonProcessingException, InterruptedException {
+	void shouldReturnErrorWhenRequestFailsWithError400() throws JsonProcessingException {
 		String targetCurrency = "BRL";
-		ExchangeRatesApiError apiError = new ExchangeRatesApiError();
-		apiError.setCode("test_error_code");
-		apiError.setMessage("test_error_message");
-		ExchangeRatesApiResponseError responseError = new ExchangeRatesApiResponseError();
-		responseError.setError(apiError);
+		ExchangeRateApiResponseError responseError = ExchangeApiResponseGenerator.getError();
 
 		mockWebServer.enqueue(new MockResponse()
 				.setResponseCode(400)

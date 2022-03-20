@@ -1,0 +1,22 @@
+[
+  {
+    "transactionId": "efed3324-9278-41a2-be92-972884f94207",
+    "destinationCurrency": "BRL",
+    "destinationValue": 18850.00,
+    "originCurrency": "EUR",
+    "originValue": 5000,
+    "exchangeRate": 3.77,
+    "createdDate": "2022-03-19T15:19:07.713802Z",
+    "userId": 2
+  },
+  {
+    "transactionId": "cb13f192-6adb-451e-9cee-7985f9695b2a",
+    "destinationCurrency": "USD",
+    "destinationValue": 22455.00,
+    "originCurrency": "EUR",
+    "originValue": 4500,
+    "exchangeRate": 4.99,
+    "createdDate": "2022-03-18T13:12:01.233603Z",
+    "userId": 2
+  }
+]

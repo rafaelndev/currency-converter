@@ -1,0 +1,7 @@
+{
+  "timestamp": "2022-03-19T23:24:14.9736535Z",
+  "status": 404,
+  "errorCode": "Not Found",
+  "message": "User 155 not found",
+  "path": "/api/v1/currency-converter/transactions/155"
+}

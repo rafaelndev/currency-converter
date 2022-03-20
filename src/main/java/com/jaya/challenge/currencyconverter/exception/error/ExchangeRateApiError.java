@@ -7,6 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ExchangeRatesApiResponseError {
-	private ExchangeRatesApiError error;
+public class ExchangeRateApiError {
+	private String code;
+	private String message;
 }

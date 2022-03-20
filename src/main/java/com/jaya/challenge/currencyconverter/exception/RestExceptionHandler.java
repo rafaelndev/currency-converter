@@ -57,7 +57,7 @@ public class RestExceptionHandler {
 
 		RestError error = RestError.builder()
 				.status(HttpStatus.BAD_REQUEST.value())
-				.errorCode(HttpStatus.NOT_FOUND.getReasonPhrase())
+				.errorCode(HttpStatus.BAD_REQUEST.getReasonPhrase())
 				.path(request.getPath().value())
 				.validationErrors(validationErrors)
 				.timestamp(DateUtils.getCurrentDateUTC())

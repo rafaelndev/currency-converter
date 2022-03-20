@@ -8,6 +8,7 @@ import com.jaya.challenge.currencyconverter.exception.EntityNotFoundException;
 import com.jaya.challenge.currencyconverter.service.response.ExchangeRateApiResponse;
 import com.jaya.challenge.currencyconverter.utils.DateUtils;
 import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
@@ -18,6 +19,7 @@ import java.util.UUID;
 
 @Service
 @AllArgsConstructor
+@Log4j2
 public class CurrencyConverterService {
 
 	private final ConversionTransactionRepository repository;
@@ -29,6 +31,7 @@ public class CurrencyConverterService {
 		return getUserById(userId)
 				.flatMap(user -> exchangeRatesApiService.getExchangeRate(targetCurrencyCode)
 						.flatMap(exchangeRateApiResponse -> {
+							log.info("Received exchange api response: {}", exchangeRateApiResponse);
 							ConversionTransaction transaction = mapConversionTransaction(value, targetCurrencyCode, user, exchangeRateApiResponse);
 							return repository.save(transaction);
 						}));

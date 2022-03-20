@@ -115,7 +115,7 @@ class CurrencyConverterServiceTest {
 		final Integer userId = 10;
 		User user = new User();
 		user.setId(10);
-		Flux<ConversionTransaction> validList = ConversionTransactionGenerator.getValidList();
+		Flux<ConversionTransaction> validList = ConversionTransactionGenerator.getValidFlux();
 
 		Mockito.when(repository.findByUserId(userId)).thenReturn(validList);
 		Mockito.when(userRepository.findById(userId)).thenReturn(Mono.just(user));
