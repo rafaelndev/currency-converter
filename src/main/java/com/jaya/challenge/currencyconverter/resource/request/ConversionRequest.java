@@ -1,5 +1,6 @@
 package com.jaya.challenge.currencyconverter.resource.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,10 +15,13 @@ import java.math.BigDecimal;
 @Setter
 @NoArgsConstructor
 @ToString
+@Schema(description = "Request body to convert endpoint")
 public class ConversionRequest {
+	@Schema(description = "Target currency code for converting", example = "BRL")
 	@NotEmpty
 	private String targetCurrency;
 
+	@Schema(description = "Value to be converted", example = "5000")
 	@NotNull
 	@Positive
 	private BigDecimal value;
