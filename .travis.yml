@@ -9,3 +9,6 @@ deploy:
   app: currency-converter-api-rafaeln
   on:
     branch: master
+  branches:
+    only:
+      - master
