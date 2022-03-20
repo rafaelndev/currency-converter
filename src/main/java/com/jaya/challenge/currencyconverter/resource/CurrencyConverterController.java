@@ -1,6 +1,6 @@
 package com.jaya.challenge.currencyconverter.resource;
 
-import com.jaya.challenge.currencyconverter.data.domain.ConversionTransaction;
+import com.jaya.challenge.currencyconverter.data.dto.ConversionTransactionDTO;
 import com.jaya.challenge.currencyconverter.resource.request.ConversionRequest;
 import com.jaya.challenge.currencyconverter.resource.response.TransactionResponse;
 import com.jaya.challenge.currencyconverter.service.CurrencyConverterService;
@@ -32,11 +32,11 @@ public class CurrencyConverterController implements CurrencyConverterResource {
 				.map(this::mapTransactionResponse);
 	}
 
-	private TransactionResponse mapTransactionResponse(ConversionTransaction transaction) {
+	private TransactionResponse mapTransactionResponse(ConversionTransactionDTO transaction) {
 		TransactionResponse transactionResponse = new TransactionResponse();
 		transactionResponse.setTransactionId(transaction.getTransactionId().toString());
 		transactionResponse.setDestinationCurrency(transaction.getDestinationCurrency());
-		transactionResponse.setDestinationValue(transaction.getOriginValue().multiply(transaction.getExchangeRate()));
+		transactionResponse.setDestinationValue(transaction.getDestinationValue());
 		transactionResponse.setOriginCurrency(transaction.getOriginCurrency());
 		transactionResponse.setOriginValue(transaction.getOriginValue());
 		transactionResponse.setExchangeRate(transaction.getExchangeRate());

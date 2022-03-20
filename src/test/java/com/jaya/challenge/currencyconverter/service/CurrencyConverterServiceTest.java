@@ -2,6 +2,7 @@ package com.jaya.challenge.currencyconverter.service;
 
 import com.jaya.challenge.currencyconverter.data.domain.ConversionTransaction;
 import com.jaya.challenge.currencyconverter.data.domain.User;
+import com.jaya.challenge.currencyconverter.data.dto.ConversionTransactionDTO;
 import com.jaya.challenge.currencyconverter.data.repository.ConversionTransactionRepository;
 import com.jaya.challenge.currencyconverter.data.repository.UserRepository;
 import com.jaya.challenge.currencyconverter.exception.EntityNotFoundException;
@@ -22,7 +23,8 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.math.BigDecimal;
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -49,7 +51,9 @@ class CurrencyConverterServiceTest {
 		User user = new User();
 		user.setId(10);
 		ExchangeRateApiResponse apiResponse = ExchangeApiResponseGenerator.getValid();
-		ConversionTransaction transaction = ConversionTransactionGenerator.getValid();
+		BigDecimal exchangeRate = apiResponse.getRates().get(targetCurrency);
+		ConversionTransaction transaction = ConversionTransactionGenerator.getValid(value, exchangeRate);
+		ConversionTransactionDTO expectedDTO = ConversionTransactionGenerator.getValidDTO(value, exchangeRate);
 
 		Mockito.when(exchangeRatesApiService.getExchangeRate(targetCurrency)).thenReturn(Mono.just(apiResponse));
 		Mockito.when(userRepository.findById(userId)).thenReturn(Mono.just(user));
@@ -57,7 +61,7 @@ class CurrencyConverterServiceTest {
 
 		StepVerifier.create(service.convertCurrency(userId, value, targetCurrency))
 				.expectSubscription()
-				.assertNext(conversionTransaction -> assertThat(conversionTransaction).usingRecursiveComparison().isEqualTo(transaction))
+				.assertNext(conversionTransaction -> assertThat(conversionTransaction).usingRecursiveComparison().isEqualTo(expectedDTO))
 				.verifyComplete();
 	}
 
@@ -116,14 +120,19 @@ class CurrencyConverterServiceTest {
 		User user = new User();
 		user.setId(10);
 		Flux<ConversionTransaction> validList = ConversionTransactionGenerator.getValidFlux();
+		List<ConversionTransactionDTO> expectedList = ConversionTransactionGenerator.getValidDTOList();
 
 		Mockito.when(repository.findByUserId(userId)).thenReturn(validList);
 		Mockito.when(userRepository.findById(userId)).thenReturn(Mono.just(user));
 
+		List<ConversionTransactionDTO> obtainedList = new ArrayList<>();
 		StepVerifier.create(service.getTransactionsByUser(userId))
 				.expectSubscription()
-				.expectNextSequence(Objects.requireNonNull(validList.collectList().block()))
+				.recordWith(ArrayList::new)
+				.expectNextCount(2)
+				.consumeRecordedWith(recorded -> assertThat(recorded).usingRecursiveComparison().isEqualTo(expectedList))
 				.verifyComplete();
+
 	}
 
 	@Test
