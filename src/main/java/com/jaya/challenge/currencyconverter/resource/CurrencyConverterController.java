@@ -4,12 +4,16 @@ import com.jaya.challenge.currencyconverter.data.dto.ConversionTransactionDTO;
 import com.jaya.challenge.currencyconverter.resource.request.ConversionRequest;
 import com.jaya.challenge.currencyconverter.resource.response.TransactionResponse;
 import com.jaya.challenge.currencyconverter.service.CurrencyConverterService;
+import com.jaya.challenge.currencyconverter.utils.DateUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 @RestController
 @RequestMapping(value = "/api/v1/currency-converter")
@@ -40,7 +44,7 @@ public class CurrencyConverterController implements CurrencyConverterResource {
 		transactionResponse.setOriginCurrency(transaction.getOriginCurrency());
 		transactionResponse.setOriginValue(transaction.getOriginValue());
 		transactionResponse.setExchangeRate(transaction.getExchangeRate());
-		transactionResponse.setCreatedDate(transaction.getCreatedDate());
+		transactionResponse.setCreatedDate(DateUtils.formatZonedDateToUTC(transaction.getCreatedDate()));
 		transactionResponse.setUserId(transaction.getUserId());
 		return transactionResponse;
 	}

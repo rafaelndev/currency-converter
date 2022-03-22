@@ -19,6 +19,6 @@ public class TransactionResponse {
 	private String originCurrency;
 	private BigDecimal originValue;
 	private BigDecimal exchangeRate;
-	private ZonedDateTime createdDate;
+	private String createdDate;
 	private Integer userId;
 }

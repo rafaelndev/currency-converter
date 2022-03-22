@@ -9,6 +9,7 @@ import com.jaya.challenge.currencyconverter.exception.error.ExchangeRateApiRespo
 import com.jaya.challenge.currencyconverter.generators.ConversionTransactionGenerator;
 import com.jaya.challenge.currencyconverter.generators.ExchangeApiResponseGenerator;
 import com.jaya.challenge.currencyconverter.resource.request.ConversionRequest;
+import com.jaya.challenge.currencyconverter.resource.response.TransactionResponse;
 import com.jaya.challenge.currencyconverter.service.response.ExchangeRateApiResponse;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -33,9 +34,12 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -162,7 +166,7 @@ class CurrencyConverterControllerTest {
 
 	@Test
 	@DisplayName("should get a list of user transactions")
-	void shouldGetAllUserTransactions() throws IOException {
+	void shouldGetAllUserTransactions() {
 		User user = addMockUser();
 
 		List<ConversionTransaction> transactionList = ConversionTransactionGenerator.getValidList().stream()
@@ -177,10 +181,14 @@ class CurrencyConverterControllerTest {
 				.expectNextCount(2)
 				.verifyComplete();
 
-		getTransactions(user.getId())
+		List<TransactionResponse> response = getTransactions(user.getId())
 				.expectStatus().isOk()
-				.expectBody()
-				.json(getJsonFromResource("json/currency-converter/response-get-user-transactions.json"));
+				.expectBodyList(TransactionResponse.class)
+				.returnResult()
+				.getResponseBody();
+
+		assertThat(response).usingRecursiveComparison().isEqualTo(getExpectedResponseUserTransactions(user));
+
 
 	}
 
@@ -231,6 +239,31 @@ class CurrencyConverterControllerTest {
 	private String getJsonFromResource(String path) throws IOException {
 		File resource = new ClassPathResource(path).getFile();
 		return new String(Files.readAllBytes(resource.toPath()));
+	}
+
+	@NotNull
+	private List<TransactionResponse> getExpectedResponseUserTransactions(User user) {
+		TransactionResponse transactionResponse1 = new TransactionResponse();
+		transactionResponse1.setTransactionId("efed3324-9278-41a2-be92-972884f94207");
+		transactionResponse1.setDestinationCurrency("BRL");
+		transactionResponse1.setDestinationValue(BigDecimal.valueOf(18850.00));
+		transactionResponse1.setOriginCurrency("EUR");
+		transactionResponse1.setOriginValue(BigDecimal.valueOf(5000));
+		transactionResponse1.setExchangeRate(BigDecimal.valueOf(3.77));
+		transactionResponse1.setCreatedDate("2022-03-19T15:19:07.713Z");
+		transactionResponse1.setUserId(user.getId());
+
+		TransactionResponse transactionResponse2 = new TransactionResponse();
+		transactionResponse2.setTransactionId("cb13f192-6adb-451e-9cee-7985f9695b2a");
+		transactionResponse2.setDestinationCurrency("USD");
+		transactionResponse2.setDestinationValue(BigDecimal.valueOf(22455.00));
+		transactionResponse2.setOriginCurrency("EUR");
+		transactionResponse2.setOriginValue(BigDecimal.valueOf(4500));
+		transactionResponse2.setExchangeRate(BigDecimal.valueOf(4.99));
+		transactionResponse2.setCreatedDate("2022-03-18T13:12:01.233Z");
+		transactionResponse2.setUserId(user.getId());
+
+		return List.of(transactionResponse1, transactionResponse2);
 	}
 
 }
