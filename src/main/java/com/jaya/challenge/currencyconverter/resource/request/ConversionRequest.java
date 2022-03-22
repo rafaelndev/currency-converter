@@ -17,6 +17,11 @@ import java.math.BigDecimal;
 @ToString
 @Schema(description = "Request body to convert endpoint")
 public class ConversionRequest {
+
+	@Schema(description = "Origin currency code for converting", example = "EUR")
+	@NotEmpty
+	private String originCurrency;
+
 	@Schema(description = "Target currency code for converting", example = "BRL")
 	@NotEmpty
 	private String targetCurrency;

@@ -17,7 +17,6 @@ import java.util.function.Function;
 @Service
 @Log4j2
 public class ExchangeRatesApiService {
-	private static final String DEFAULT_SOURCE_CURRENCY = "EUR";
 	private final WebClient client;
 	private final ExchangeRatesApiConfig config;
 
@@ -28,12 +27,12 @@ public class ExchangeRatesApiService {
 		this.config = config;
 	}
 
-	public Mono<ExchangeRateApiResponse> getExchangeRate(String targetCurrency) {
-		log.info("Trying to Get Exchange Rate, URL: {}, targetCurrency: {}", config.getUrl(), targetCurrency);
+	public Mono<ExchangeRateApiResponse> getExchangeRate(String originCurrency, String targetCurrency) {
+		log.info("Trying to Get Exchange Rate, URL: {}, originCurrency: {}, targetCurrency: {}", config.getUrl(), originCurrency, targetCurrency);
 		return client.get()
 				.uri(config.getUrl(),
 						uri -> uri.queryParam("access_key", config.getAccessKey())
-								.queryParam("base", DEFAULT_SOURCE_CURRENCY)
+								.queryParam("base", originCurrency)
 								.queryParam("symbols", targetCurrency)
 								.build())
 				.retrieve()

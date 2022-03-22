@@ -20,7 +20,7 @@ public class CurrencyConverterController implements CurrencyConverterResource {
 
 	public Mono<TransactionResponse> convertCurrency(Integer userId, ConversionRequest request) {
 		log.info("Converting currency for user {}, with request: {}", userId, request);
-		return service.convertCurrency(userId, request.getValue(), request.getTargetCurrency())
+		return service.convertCurrency(userId, request.getValue(), request.getOriginCurrency(), request.getTargetCurrency())
 				.map(this::mapTransactionResponse);
 
 	}

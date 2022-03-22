@@ -46,6 +46,7 @@ class ExchangeRatesApiServiceTest {
 	@DisplayName("should return a valid ExchangeRateApiResponse on getExchangeRate")
 	void shouldReturnValidResponseOnGetExchangeRate() throws JsonProcessingException, InterruptedException {
 		String targetCurrency = "BRL";
+		String originCurrency = "EUR";
 		ExchangeRateApiResponse expectedResponse = ExchangeApiResponseGenerator.getValid();
 
 		mockWebServer.enqueue(new MockResponse()
@@ -53,7 +54,7 @@ class ExchangeRatesApiServiceTest {
 				.addHeader("Content-Type", "application/json")
 		);
 
-		Mono<ExchangeRateApiResponse> exchangeRateResponse = apiService.getExchangeRate(targetCurrency);
+		Mono<ExchangeRateApiResponse> exchangeRateResponse = apiService.getExchangeRate(originCurrency, targetCurrency);
 
 		StepVerifier.create(exchangeRateResponse)
 				.assertNext(exchangeRateApiResponse -> assertThat(exchangeRateApiResponse).usingRecursiveComparison().isEqualTo(expectedResponse))
@@ -69,6 +70,7 @@ class ExchangeRatesApiServiceTest {
 	@DisplayName("should return a ExchangeRatesApiException when request to api fails with error 4xx")
 	void shouldReturnErrorWhenRequestFailsWithError400() throws JsonProcessingException {
 		String targetCurrency = "BRL";
+		String originCurrency = "EUR";
 		ExchangeRateApiResponseError responseError = ExchangeApiResponseGenerator.getError();
 
 		mockWebServer.enqueue(new MockResponse()
@@ -77,7 +79,7 @@ class ExchangeRatesApiServiceTest {
 				.addHeader("Content-Type", "application/json")
 		);
 
-		Mono<ExchangeRateApiResponse> exchangeRateResponse = apiService.getExchangeRate(targetCurrency);
+		Mono<ExchangeRateApiResponse> exchangeRateResponse = apiService.getExchangeRate(originCurrency, targetCurrency);
 
 		StepVerifier.create(exchangeRateResponse)
 				.expectErrorSatisfies(throwable -> {
@@ -95,6 +97,7 @@ class ExchangeRatesApiServiceTest {
 	@DisplayName("should return a ExchangeRatesApiException when request to api fails with error 5xx")
 	void shouldReturnErrorWhenRequestFailsWithError500() {
 		String targetCurrency = "BRL";
+		String originCurrency = "EUR";
 
 		mockWebServer.enqueue(new MockResponse()
 				.setResponseCode(500)
@@ -102,7 +105,7 @@ class ExchangeRatesApiServiceTest {
 				.addHeader("Content-Type", "application/json")
 		);
 
-		Mono<ExchangeRateApiResponse> exchangeRateResponse = apiService.getExchangeRate(targetCurrency);
+		Mono<ExchangeRateApiResponse> exchangeRateResponse = apiService.getExchangeRate(originCurrency, targetCurrency);
 
 		StepVerifier.create(exchangeRateResponse)
 				.expectErrorSatisfies(throwable -> {

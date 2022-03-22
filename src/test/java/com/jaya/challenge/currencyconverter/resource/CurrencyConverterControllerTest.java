@@ -63,7 +63,7 @@ class CurrencyConverterControllerTest {
 	}
 
 	@DynamicPropertySource
-	static void properties(DynamicPropertyRegistry r) throws IOException {
+	static void properties(DynamicPropertyRegistry r) {
 		r.add("app.config.exchange-rates-api.url ", () -> String.format("http://localhost:%s", mockWebServer.getPort()));
 		r.add("app.config.exchange-rates-api.accessKey ", () -> "access_key_test");
 	}
@@ -78,7 +78,8 @@ class CurrencyConverterControllerTest {
 	void shouldConvertCurrency() throws IOException {
 		User user = addMockUser();
 		String targetCurrency = "BRL";
-		ConversionRequest request = getConversionRequest(targetCurrency, BigDecimal.valueOf(5000));
+		String originCurrency = "EUR";
+		ConversionRequest request = getConversionRequest(originCurrency, targetCurrency, BigDecimal.valueOf(5000));
 		ExchangeRateApiResponse expectedResponse = ExchangeApiResponseGenerator.getValid();
 
 		mockWebServer.enqueue(new MockResponse()
@@ -103,7 +104,8 @@ class CurrencyConverterControllerTest {
 	void shouldFailToConvertWhenApiReturnsError() throws IOException {
 		User user = addMockUser();
 		String targetCurrency = "BRL";
-		ConversionRequest request = getConversionRequest(targetCurrency, BigDecimal.valueOf(5000));
+		String originCurrency = "EUR";
+		ConversionRequest request = getConversionRequest(originCurrency, targetCurrency, BigDecimal.valueOf(5000));
 		ExchangeRateApiResponseError responseError = ExchangeApiResponseGenerator.getError();
 
 		mockWebServer.enqueue(new MockResponse()
@@ -123,7 +125,7 @@ class CurrencyConverterControllerTest {
 	@Test
 	@DisplayName("should fail to convert currency when user is invalid")
 	void shouldFailToConvertCurrencyWithInvalidUser() {
-		ConversionRequest request = getConversionRequest("BRL", BigDecimal.valueOf(5000));
+		ConversionRequest request = getConversionRequest("EUR", "BRL", BigDecimal.valueOf(5000));
 		postConvert(155, request)
 				.expectStatus().isNotFound()
 				.expectBody()
@@ -135,20 +137,21 @@ class CurrencyConverterControllerTest {
 	@Test
 	@DisplayName("should fail to convert currency when request is invalid with null parameters")
 	void shouldFailToConvertCurrencyWithInvalidRequestNull() {
-		ConversionRequest request = getConversionRequest(null, null);
+		ConversionRequest request = getConversionRequest(null, null, null);
 		postConvert(20, request)
 				.expectStatus().isBadRequest()
 				.expectBody()
 				.jsonPath("$.status").isEqualTo(400)
 				.jsonPath("$.errorCode").isEqualTo("Bad Request")
 				.jsonPath("$.validationErrors['targetCurrency']").isEqualTo("must not be empty")
+				.jsonPath("$.validationErrors['originCurrency']").isEqualTo("must not be empty")
 				.jsonPath("$.validationErrors['value']").isEqualTo("must not be null");
 	}
 
 	@Test
 	@DisplayName("should fail to convert currency when request value is not positive")
 	void shouldFailToConvertCurrencyWithNotPositiveValue() {
-		ConversionRequest request = getConversionRequest(null, BigDecimal.valueOf(-5));
+		ConversionRequest request = getConversionRequest(null, null, BigDecimal.valueOf(-5));
 		postConvert(20, request)
 				.expectStatus().isBadRequest()
 				.expectBody()
@@ -201,8 +204,9 @@ class CurrencyConverterControllerTest {
 	}
 
 	@NotNull
-	private ConversionRequest getConversionRequest(String targetCurrency, BigDecimal value) {
+	private ConversionRequest getConversionRequest(String originCurrency, String targetCurrency, BigDecimal value) {
 		ConversionRequest request = new ConversionRequest();
+		request.setOriginCurrency(originCurrency);
 		request.setTargetCurrency(targetCurrency);
 		request.setValue(value);
 		return request;

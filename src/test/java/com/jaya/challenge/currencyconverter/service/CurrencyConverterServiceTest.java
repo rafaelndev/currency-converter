@@ -46,6 +46,7 @@ class CurrencyConverterServiceTest {
 	@DisplayName("should return a valid saved Conversion Transaction")
 	void shouldReturnValidConversionTransaction() {
 		final String targetCurrency = "BRL";
+		final String originCurrency = "BRL";
 		final Integer userId = 10;
 		final BigDecimal value = BigDecimal.valueOf(100);
 		User user = new User();
@@ -55,11 +56,11 @@ class CurrencyConverterServiceTest {
 		ConversionTransaction transaction = ConversionTransactionGenerator.getValid(value, exchangeRate);
 		ConversionTransactionDTO expectedDTO = ConversionTransactionGenerator.getValidDTO(value, exchangeRate);
 
-		Mockito.when(exchangeRatesApiService.getExchangeRate(targetCurrency)).thenReturn(Mono.just(apiResponse));
+		Mockito.when(exchangeRatesApiService.getExchangeRate(originCurrency, targetCurrency)).thenReturn(Mono.just(apiResponse));
 		Mockito.when(userRepository.findById(userId)).thenReturn(Mono.just(user));
 		Mockito.when(repository.save(ArgumentMatchers.any(ConversionTransaction.class))).thenReturn(Mono.just(transaction));
 
-		StepVerifier.create(service.convertCurrency(userId, value, targetCurrency))
+		StepVerifier.create(service.convertCurrency(userId, value, originCurrency, targetCurrency))
 				.expectSubscription()
 				.assertNext(conversionTransaction -> assertThat(conversionTransaction).usingRecursiveComparison().isEqualTo(expectedDTO))
 				.verifyComplete();
@@ -69,17 +70,18 @@ class CurrencyConverterServiceTest {
 	@DisplayName("should convert and save a successful transaction on convertCurrency")
 	void shouldConvertAndSaveTransaction() {
 		final String targetCurrency = "BRL";
+		final String originCurrency = "EUR";
 		final Integer userId = 10;
 		final BigDecimal value = BigDecimal.valueOf(100);
 		User user = new User();
 		user.setId(10);
 		ExchangeRateApiResponse apiResponse = ExchangeApiResponseGenerator.getValid();
 
-		Mockito.when(exchangeRatesApiService.getExchangeRate(targetCurrency)).thenReturn(Mono.just(apiResponse));
+		Mockito.when(exchangeRatesApiService.getExchangeRate(originCurrency, targetCurrency)).thenReturn(Mono.just(apiResponse));
 		Mockito.when(userRepository.findById(userId)).thenReturn(Mono.just(user));
 		Mockito.when(repository.save(ArgumentMatchers.any(ConversionTransaction.class))).thenReturn(Mono.empty());
 
-		StepVerifier.create(service.convertCurrency(userId, value, targetCurrency))
+		StepVerifier.create(service.convertCurrency(userId, value, originCurrency, targetCurrency))
 				.expectSubscription()
 				.verifyComplete();
 
@@ -91,6 +93,7 @@ class CurrencyConverterServiceTest {
 		assertThat(capturedTransaction.getOriginCurrency()).isEqualTo("EUR");
 		assertThat(capturedTransaction.getExchangeRate()).isEqualTo(BigDecimal.valueOf(1.5));
 		assertThat(capturedTransaction.getDestinationCurrency()).isEqualTo(targetCurrency);
+		assertThat(capturedTransaction.getOriginCurrency()).isEqualTo(originCurrency);
 		assertThat(capturedTransaction.getOriginValue()).isEqualTo(value);
 		assertThat(capturedTransaction.getCreatedDate()).isNotNull();
 		assertThat(capturedTransaction.getUserId()).isEqualTo(userId);
@@ -103,7 +106,7 @@ class CurrencyConverterServiceTest {
 
 		Mockito.when(userRepository.findById(userId)).thenReturn(Mono.empty());
 
-		StepVerifier.create(service.convertCurrency(userId, BigDecimal.valueOf(1.0), "BRL"))
+		StepVerifier.create(service.convertCurrency(userId, BigDecimal.valueOf(1.0), "EUR", "BRL"))
 				.expectSubscription()
 				.expectErrorSatisfies(throwable -> {
 					assertThat(throwable).isInstanceOf(EntityNotFoundException.class);
@@ -125,14 +128,12 @@ class CurrencyConverterServiceTest {
 		Mockito.when(repository.findByUserId(userId)).thenReturn(validList);
 		Mockito.when(userRepository.findById(userId)).thenReturn(Mono.just(user));
 
-		List<ConversionTransactionDTO> obtainedList = new ArrayList<>();
 		StepVerifier.create(service.getTransactionsByUser(userId))
 				.expectSubscription()
 				.recordWith(ArrayList::new)
 				.expectNextCount(2)
 				.consumeRecordedWith(recorded -> assertThat(recorded).usingRecursiveComparison().isEqualTo(expectedList))
 				.verifyComplete();
-
 	}
 
 	@Test

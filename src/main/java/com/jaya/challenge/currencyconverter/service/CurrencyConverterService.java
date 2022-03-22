@@ -29,12 +29,13 @@ public class CurrencyConverterService {
 	private final ExchangeRatesApiService exchangeRatesApiService;
 
 	@Transactional
-	public Mono<ConversionTransactionDTO> convertCurrency(Integer userId, BigDecimal value, String targetCurrencyCode) {
+	public Mono<ConversionTransactionDTO> convertCurrency(Integer userId, BigDecimal value, String originCurrencyCode, String targetCurrencyCode) {
 		return getUserById(userId)
-				.flatMap(user -> exchangeRatesApiService.getExchangeRate(targetCurrencyCode)
+				.flatMap(user -> exchangeRatesApiService.getExchangeRate(originCurrencyCode, targetCurrencyCode)
 						.flatMap(exchangeRateApiResponse -> {
 							log.info("Received exchange api response: {}", exchangeRateApiResponse);
-							ConversionTransaction transaction = mapConversionTransaction(value, targetCurrencyCode, user, exchangeRateApiResponse);
+							ConversionTransaction transaction = mapConversionTransaction(value, originCurrencyCode, targetCurrencyCode, user,
+									exchangeRateApiResponse);
 							BigDecimal calculatedValue = calculateDestinationValue(transaction);
 							return mapTransactionToDTO(repository.save(transaction), calculatedValue);
 						}));
@@ -50,10 +51,11 @@ public class CurrencyConverterService {
 						}));
 	}
 
-	private ConversionTransaction mapConversionTransaction(BigDecimal value, String targetCurrencyCode, User user, ExchangeRateApiResponse exchangeRateApiResponse) {
+	private ConversionTransaction mapConversionTransaction(BigDecimal value, String originCurrencyCode, String targetCurrencyCode, User user,
+														   ExchangeRateApiResponse exchangeRateApiResponse) {
 		ConversionTransaction transaction = new ConversionTransaction();
 		transaction.setTransactionId(UUID.randomUUID());
-		transaction.setOriginCurrency("EUR");
+		transaction.setOriginCurrency(originCurrencyCode);
 		transaction.setExchangeRate(exchangeRateApiResponse.getRates().get(targetCurrencyCode));
 		transaction.setDestinationCurrency(targetCurrencyCode);
 		transaction.setOriginValue(value);
