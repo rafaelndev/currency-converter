@@ -16,3 +16,7 @@ create table conversion_transaction (
 );
 
 insert into user (name) values ('Rafael');
+insert into user (name) values ('Renata');
+insert into user (name) values ('João');
+insert into user (name) values ('Maria');
+insert into user (name) values ('Pedro');
